@@ -38,7 +38,9 @@ app.get('/warehouse', function(req, res) {
             console.log('Requested bin number ' + binnumber);
         }
         else 
-        { res.sendFile(filePath + warehouseImage, function (err) 
+        { 
+            res.setHeader('content-type', 'image/png');
+            res.sendFile(filePath + warehouseImage, function (err) 
             {
                 if (err) throw err;
                 console.log('image sent');
