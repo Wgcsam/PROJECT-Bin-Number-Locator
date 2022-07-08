@@ -38,25 +38,28 @@ app.get('/warehouse', function(req, res) {
         }
         else if (result[0] == undefined) 
         {
-            res.send("<h1>Page not found on the server</h1>");
+            res.status(400).send("<h1>Bad request. Page not found on the server</h1>");
             console.log('Requested bin number ' + binnumber);
         }
         else 
         { 
-            sharp(filePath + warehouseImage).composite([
-                { 
-                    input: filePath + marker,
-                    left: result[0].bin_x_coord, top: result[0].bin_y_coord
-                }
-            ]).toFile(filePath + combined);
-            
-            res.setHeader('content-type', 'image/png');
-            res.sendFile(filePath + combined, function (err) 
-            {
-                if (err) throw err;
-                console.log('image sent');
-                console.log(result);
-            });
+            (async () => {
+                const processed = sharp(filePath + warehouseImage).composite([
+                    { 
+                        input: filePath + marker,
+                        left: result[0].bin_x_coord, top: result[0].bin_y_coord
+                    }
+                ]);
+                await processed.toFile(filePath + combined).then(() => {
+                    res.setHeader('content-type', 'image/png');
+                    res.sendFile(filePath + combined, function (err) 
+                    {
+                        if (err) throw err;
+                        console.log('image sent');
+                        console.log(result);
+                    });
+                });
+            })();
         }
     });
 });
