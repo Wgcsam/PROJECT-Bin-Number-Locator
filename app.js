@@ -2,6 +2,12 @@ const express = require('express');
 const mysql = require('mysql');
 const sharp = require ('sharp');
 
+//Variables used for image generation
+var filePath = '/Users/wgcsa/PROJECT Bin Number Locator/images';
+var warehouseImage = '/WarehouseLayout_Base.png';
+var marker = '/fill.png';
+var combined = '/combined.png';
+
 //Create connection to MySQL server
 const db = mysql.createConnection({
     host     : "localhost",
@@ -16,19 +22,15 @@ db.connect(function(err) {
     console.log('MySQL Connected....');
 });
 
+//Create local environment for testing at port 3000
 const port = process.env.PORT || 3000
-
 const app = express();
 
-var filePath = '/Users/wgcsa/PROJECT Bin Number Locator/images';
-var warehouseImage = '/WarehouseLayout_Base.png';
-var marker = '/fill.png';
-var combined = '/combined.png';
-
+//Receive web request and validate
 app.get('/warehouse', function(req, res) {
     const binnumber = req.query.binnumber;
 
-    db.query("SELECT bin_column, bin_row FROM warehousebins.bin_location WHERE bin_number = '" + binnumber + "'", function (err, result, fields) 
+    db.query("SELECT bin_x_coord, bin_y_coord FROM warehousebins.bin_location WHERE bin_number = '" + binnumber + "'", function (err, result, fields) 
     {
         if (err) 
         {
@@ -44,7 +46,7 @@ app.get('/warehouse', function(req, res) {
             sharp(filePath + warehouseImage).composite([
                 { 
                     input: filePath + marker,
-                    top: 1000, left: 1000
+                    left: result[0].bin_x_coord, top: result[0].bin_y_coord
                 }
             ]).toFile(filePath + combined);
             
