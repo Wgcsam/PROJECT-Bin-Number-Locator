@@ -1,5 +1,6 @@
 const express = require('express');
 const mysql = require('mysql');
+const sharp = require ('sharp');
 
 //Create connection to MySQL server
 const db = mysql.createConnection({
@@ -21,7 +22,8 @@ const app = express();
 
 var filePath = '/Users/wgcsa/PROJECT Bin Number Locator/images';
 var warehouseImage = '/WarehouseLayout_Base.png';
-var marker = '';
+var marker = '/fill.png';
+var combined = '/combined.png';
 
 app.get('/warehouse', function(req, res) {
     const binnumber = req.query.binnumber;
@@ -39,8 +41,15 @@ app.get('/warehouse', function(req, res) {
         }
         else 
         { 
+            sharp(filePath + warehouseImage).composite([
+                { 
+                    input: filePath + marker,
+                    top: 1000, left: 1000
+                }
+            ]).toFile(filePath + combined);
+            
             res.setHeader('content-type', 'image/png');
-            res.sendFile(filePath + warehouseImage, function (err) 
+            res.sendFile(filePath + combined, function (err) 
             {
                 if (err) throw err;
                 console.log('image sent');
