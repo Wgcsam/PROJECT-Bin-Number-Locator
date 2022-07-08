@@ -1,0 +1,16 @@
+{
+  "name": "project-bin-number-locator",
+  "version": "1.0.0",
+  "description": "A web based tool to display the location of a specific bin location within our warehouse.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app"
+  },
+  "author": "Sam Falla",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.1",
+    "mysql": "^2.18.1"
+  }
+}
