@@ -30,6 +30,7 @@ const app = express();
 app.get('/warehouse', function(req, res) {
     const binnumber = req.query.binnumber;
 
+    //Query MySQL database for bin using data located in web request
     db.query("SELECT bin_x_coord, bin_y_coord FROM warehousebins.bin_location WHERE bin_number = '" + binnumber + "'", function (err, result, fields) 
     {
         if (err) 
@@ -43,14 +44,18 @@ app.get('/warehouse', function(req, res) {
         }
         else 
         { 
+            //Asynchronously begin image generation
             (async () => {
                 const processed = sharp(filePath + warehouseImage).composite([
                     { 
+                        //Use data from MySQL to place the marker in the correct spot and generate new image
                         input: filePath + marker,
                         left: result[0].bin_x_coord, top: result[0].bin_y_coord
                     }
                 ]);
+                //Ensure new image is saved before returning result to user
                 await processed.toFile(filePath + combined).then(() => {
+                    //Set http header for png and send to user
                     res.setHeader('content-type', 'image/png');
                     res.sendFile(filePath + combined, function (err) 
                     {
