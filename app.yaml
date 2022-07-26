@@ -1,0 +1,2 @@
+service: BinLocator
+runtime: nodejs16
