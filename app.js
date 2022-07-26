@@ -1,10 +1,11 @@
 const express = require('express');
 const mysql = require('mysql');
 const sharp = require ('sharp');
+const fs = require("fs");
 
 //Variables used for image generation
-var filePath = '/Users/wgcsa/PROJECT Bin Number Locator/images';
-var warehouseImage = '/WarehouseLayout_Base.png';
+var filePath = '/Users/Sam/Documents/JR Projects/PROJECT-Bin-Number-Locator/images';
+var warehouseImage = '/WarehouseLayout_New.png';
 var marker = '/fill.png';
 var combined = '/combined.png';
 
@@ -12,7 +13,7 @@ var combined = '/combined.png';
 const db = mysql.createConnection({
     host     : "localhost",
     user     : "root",
-    password : "Password",
+    password : "JRPassword1!",
     database : "warehousebins"
 });
 
@@ -25,6 +26,8 @@ db.connect(function(err) {
 //Create local environment for testing at port 3000
 const port = process.env.PORT || 3000
 const app = express();
+
+app.enable('trust proxy');
 
 //Receive web request and validate
 app.get('/warehouse', function(req, res) {
@@ -44,30 +47,45 @@ app.get('/warehouse', function(req, res) {
         }
         else 
         { 
-            //Asynchronously begin image generation
+            //create buffer of black marker
+            const blackPng = sharp({
+                create: {
+                    width: 68,
+                    height: 72,
+                    channels: 3,
+                    //use below for solid fill
+                    //background: { r: 0, g: 0, b: 0 }
+                    //
+                    //use below for blurred fill
+                    noise: {
+                        type: 'gaussian',
+                        mean: 40,
+                        sigma: 50
+                    }
+                }
+            }).png()
+            .toBuffer();
+            
+            blackPng.then((data) => {
             (async () => {
                 const processed = sharp(filePath + warehouseImage).composite([
                     { 
+                        input: data,
                         //Use data from MySQL to place the marker in the correct spot and generate new image
-                        input: filePath + marker,
                         left: result[0].bin_x_coord, top: result[0].bin_y_coord
                     }
-                ]);
-                //Ensure new image is saved before returning result to user
-                await processed.toFile(filePath + combined).then(() => {
-                    //Set http header for png and send to user
+                ]).png();
+                await processed.toBuffer().then((text) => {
                     res.setHeader('content-type', 'image/png');
-                    res.sendFile(filePath + combined, function (err) 
-                    {
-                        if (err) throw err;
-                        console.log('image sent');
-                        console.log(result);
-                    });
+                    res.send(text)
+                    console.log("success");
                 });
             })();
-        }
+        });
+        };
     });
 });
+
 
 app.listen(port, () => {
     console.log('Server started on port 3000');
