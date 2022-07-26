@@ -2,6 +2,7 @@ const express = require('express');
 const mysql = require('mysql');
 const sharp = require ('sharp');
 const fs = require("fs");
+require('dotenv').config();
 
 //Variables used for image generation
 var filePath = '/Users/Sam/Documents/JR Projects/PROJECT-Bin-Number-Locator/images';
@@ -11,10 +12,10 @@ var combined = '/combined.png';
 
 //Create connection to MySQL server
 const db = mysql.createConnection({
-    host     : process.env.local,
-    user     : process.env.local,
-    password : process.env.local,
-    database : process.env.local
+    host     : process.env.DB_NAME,
+    user     : process.env.DB_USER,
+    password : process.env.DB_PASS,
+    database : process.env.DB_BASE
 });
 
 //Connect and query warehouse server to return location of bin
