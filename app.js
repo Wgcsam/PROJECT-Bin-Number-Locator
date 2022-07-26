@@ -11,10 +11,10 @@ var combined = '/combined.png';
 
 //Create connection to MySQL server
 const db = mysql.createConnection({
-    host     : "localhost",
-    user     : "root",
-    password : "JRPassword1!",
-    database : "warehousebins"
+    host     : process.env.local,
+    user     : process.env.local,
+    password : process.env.local,
+    database : process.env.local
 });
 
 //Connect and query warehouse server to return location of bin
