@@ -11,14 +11,14 @@ var warehouseImage = './images/WarehouseLayout_New.png';
 let db = null;
 
 if ('DB_NAME' in process.env) {
-    mysql.createConnection({
+    db = mysql.createConnection({
         host     : process.env.DB_NAME,
         user     : process.env.DB_USER,
         password : process.env.DB_PASS,
         database : process.env.DB_BASE
     });
 } else {
-    mysql.createConnection({
+    db = mysql.createConnection({
         socketPath : process.env.DB_SOCKET,
         user     : process.env.DB_USER,
         password : process.env.DB_PASS,
