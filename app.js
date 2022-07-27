@@ -2,21 +2,23 @@ const express = require('express');
 const mysql = require('mysql');
 const sharp = require ('sharp');
 const fs = require("fs");
+const { response } = require('express');
 require('dotenv').config();
 
 //Variables used for image generation
-var filePath = '/Users/Sam/Documents/JR Projects/PROJECT-Bin-Number-Locator/images';
-var warehouseImage = '/WarehouseLayout_New.png';
-var marker = '/fill.png';
-var combined = '/combined.png';
+var warehouseImage = './images/WarehouseLayout_New.png';
 
+/*
 //Create connection to MySQL server
-const db = mysql.createConnection({
-    socketPath : process.env.DB_NAME,
+let db = mysql.createConnection({
+    //socketPath : process.env.DB_NAME,
+    host     : process.env.DB_NAME,
     user     : process.env.DB_USER,
     password : process.env.DB_PASS,
     database : process.env.DB_BASE
-});
+});*/
+
+let db = mysql.createConnection('mysql://' + process.env.DB_USER + ':' + process.env.DB_PASS + '@' + process.env.DB_NAME + '/' + process.env.DB_BASE + '?');
 
 //Connect and query warehouse server to return location of bin
 db.connect(function(err) {
@@ -33,9 +35,15 @@ app.enable('trust proxy');
 //Receive web request and validate
 app.get('/warehouse', function(req, res) {
     const binnumber = req.query.binnumber;
-
+    if (typeof binnumber != "string" || binnumber.length > 5)
+    {
+        res.send("Invalid parameters!");
+        res.end();
+        return;
+    }
+    
     //Query MySQL database for bin using data located in web request
-    db.query("SELECT bin_x_coord, bin_y_coord FROM warehousebins.bin_location WHERE bin_number = '" + binnumber + "'", function (err, result, fields) 
+    db.query("SELECT bin_x_coord, bin_y_coord FROM " + process.env.DB_BASE + ".bin_location WHERE bin_number = ?", [binnumber], function (err, result, fields) 
     {
         if (err) 
         {
@@ -69,7 +77,7 @@ app.get('/warehouse', function(req, res) {
             
             blackPng.then((data) => {
             (async () => {
-                const processed = sharp(filePath + warehouseImage).composite([
+                const processed = sharp(warehouseImage).composite([
                     { 
                         input: data,
                         //Use data from MySQL to place the marker in the correct spot and generate new image
