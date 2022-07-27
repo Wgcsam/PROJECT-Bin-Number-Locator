@@ -1,13 +1,11 @@
 const express = require('express');
 const mysql = require('mysql');
 const sharp = require ('sharp');
-const fs = require("fs");
-const { response } = require('express');
-const { isNumberObject } = require('util/types');
 require('dotenv').config();
 
 //Variables used for image generation
 var warehouseImage = './images/WarehouseLayout_New.png';
+var errorImage = './images/WarehouseErrorMessage.png';
 
 let db = null;
 
@@ -40,10 +38,9 @@ const app = express();
 
 app.enable('trust proxy');
 
-let imageWidth = 3000;
-
 //Receive web request and validate
 app.get('/warehouse', function(req, res) {
+    let imageWidth = 3000;
     const binnumber = req.query.binnumber;
     if (req.query.width != null)
     {
@@ -75,7 +72,15 @@ app.get('/warehouse', function(req, res) {
         }
         else if (result[0] == undefined) 
         {
-            res.status(400).send("<h1>Bad request. Page not found on the server</h1>");
+            (async () => {
+                const errorMessage = sharp(errorImage).resize({width: imageWidth})
+                .png();
+
+                await errorMessage.toBuffer().then((text) => {
+                    res.setHeader('content-type', 'image/png');
+                    res.send(text)
+                })
+            })();
             console.log('Requested bin number ' + binnumber);
         }
         else 
@@ -110,7 +115,7 @@ app.get('/warehouse', function(req, res) {
                             res.send(text)
                             console.log("success");
                         })
-                })();
+                    })();
                 });
             })();
         });
