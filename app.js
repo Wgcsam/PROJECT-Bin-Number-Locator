@@ -3,6 +3,7 @@ const mysql = require('mysql');
 const sharp = require ('sharp');
 const fs = require("fs");
 const { response } = require('express');
+const { isNumberObject } = require('util/types');
 require('dotenv').config();
 
 //Variables used for image generation
@@ -39,9 +40,25 @@ const app = express();
 
 app.enable('trust proxy');
 
+let imageWidth = 3000;
+
 //Receive web request and validate
 app.get('/warehouse', function(req, res) {
     const binnumber = req.query.binnumber;
+    if (req.query.width != null)
+    {
+        if (parseInt(req.query.width) && !Number(isNaN))
+        {
+            imageWidth = parseInt(req.query.width);
+            console.log(imageWidth);
+        }
+        else{
+            res.send("Invalid parameters!");
+            res.end();
+            return;
+        }
+    }
+
     if (typeof binnumber != "string" || binnumber.length > 5)
     {
         res.send("Invalid parameters!");
@@ -69,15 +86,7 @@ app.get('/warehouse', function(req, res) {
                     width: 68,
                     height: 72,
                     channels: 3,
-                    //use below for solid fill
                     background: { r: 0, g: 0, b: 0 }
-                    //
-                    //use below for blurred fill
-                    //noise: {
-                    //    type: 'gaussian',
-                    //    mean: 40,
-                    //    sigma: 50
-                    //}
                 }
             }).png()
             .toBuffer();
@@ -91,10 +100,17 @@ app.get('/warehouse', function(req, res) {
                         left: result[0].bin_x_coord, top: result[0].bin_y_coord
                     }
                 ]).png();
-                await processed.toBuffer().then((text) => {
-                    res.setHeader('content-type', 'image/png');
-                    res.send(text)
-                    console.log("success");
+                
+                await processed.toBuffer().then((fill) => {
+                    (async () => {
+                        fill = sharp(fill).resize({width: imageWidth});
+
+                        await fill.toBuffer().then((text) => {
+                            res.setHeader('content-type', 'image/png');
+                            res.send(text)
+                            console.log("success");
+                        })
+                })();
                 });
             })();
         });
