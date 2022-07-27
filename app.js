@@ -70,14 +70,14 @@ app.get('/warehouse', function(req, res) {
                     height: 72,
                     channels: 3,
                     //use below for solid fill
-                    //background: { r: 0, g: 0, b: 0 }
+                    background: { r: 0, g: 0, b: 0 }
                     //
                     //use below for blurred fill
-                    noise: {
-                        type: 'gaussian',
-                        mean: 40,
-                        sigma: 50
-                    }
+                    //noise: {
+                    //    type: 'gaussian',
+                    //    mean: 40,
+                    //    sigma: 50
+                    //}
                 }
             }).png()
             .toBuffer();
