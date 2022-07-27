@@ -8,17 +8,24 @@ require('dotenv').config();
 //Variables used for image generation
 var warehouseImage = './images/WarehouseLayout_New.png';
 
-/*
-//Create connection to MySQL server
-let db = mysql.createConnection({
-    //socketPath : process.env.DB_NAME,
-    host     : process.env.DB_NAME,
-    user     : process.env.DB_USER,
-    password : process.env.DB_PASS,
-    database : process.env.DB_BASE
-});*/
+let db = null;
 
-let db = mysql.createConnection('mysql://' + process.env.DB_USER + ':' + process.env.DB_PASS + '@' + process.env.DB_NAME + '/' + process.env.DB_BASE + '?');
+if (process.env.DB_NAME.length === 0) {
+    mysql.createConnection({
+        host     : process.env.DB_NAME,
+        user     : process.env.DB_USER,
+        password : process.env.DB_PASS,
+        database : process.env.DB_BASE
+    });
+} else {
+    mysql.createConnection({
+        socketPath : process.env.DB_SOCKET,
+        user     : process.env.DB_USER,
+        password : process.env.DB_PASS,
+        database : process.env.DB_BASE
+    });
+}
+
 
 //Connect and query warehouse server to return location of bin
 db.connect(function(err) {

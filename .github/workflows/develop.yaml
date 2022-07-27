@@ -24,7 +24,7 @@ jobs:
       - name: Make envfile
         uses: SpicyPizza/create-envfile@v1.3
         with:
-          envkey_DB_NAME: ${{ secrets.DB_TEST_CON }}
+          envkey_DB_SOCKET: ${{ secrets.DB_TEST_CON }}
           envkey_DB_USER: ${{ secrets.DB_TEST_USER }}
           envkey_DB_PASS: ${{ secrets.DB_TEST_PASS }}
           envkey_DB_BASE: ${{ secrets.DB_TEST_NAME}}
