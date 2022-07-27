@@ -10,7 +10,7 @@ var warehouseImage = './images/WarehouseLayout_New.png';
 
 let db = null;
 
-if (process.env.DB_NAME != undefined || process.env.DB_NAME.length === 0) {
+if ('DB_NAME' in process.env) {
     mysql.createConnection({
         host     : process.env.DB_NAME,
         user     : process.env.DB_USER,
