@@ -64,7 +64,7 @@ app.get('/warehouse', function(req, res) {
     }
     
     //Query MySQL database for bin using data located in web request
-    db.query("SELECT bin_x_coord, bin_y_coord FROM " + process.env.DB_BASE + ".bin_location WHERE bin_number = ?", [binnumber], function (err, result, fields) 
+    db.query("SELECT top_left_x, top_left_y, bottom_right_x, bottom_right_y FROM " + process.env.DB_BASE + ".bin_location WHERE bin_number = ?", [binnumber], function (err, result, fields) 
     {
         if (err) 
         {
@@ -85,6 +85,11 @@ app.get('/warehouse', function(req, res) {
         }
         else 
         { 
+            let fillWidth = (result[0].bottom_right_x - result[0].top_left_x)
+            console.log(fillWidth)
+            let fillHeight = (result[0].bottom_right_y - result[0].top_left_y)
+            console.log(fillHeight)
+
             //create buffer of black marker
             const blackPng = sharp({
                 create: {
@@ -102,7 +107,7 @@ app.get('/warehouse', function(req, res) {
                     { 
                         input: data,
                         //Use data from MySQL to place the marker in the correct spot and generate new image
-                        left: result[0].bin_x_coord, top: result[0].bin_y_coord
+                        left: result[0].top_left_x, top: result[0].top_left_y
                     }
                 ]).png();
                 
