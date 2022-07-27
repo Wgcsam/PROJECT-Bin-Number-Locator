@@ -85,16 +85,14 @@ app.get('/warehouse', function(req, res) {
         }
         else 
         { 
-            let fillWidth = (result[0].bottom_right_x - result[0].top_left_x)
-            console.log(fillWidth)
-            let fillHeight = (result[0].bottom_right_y - result[0].top_left_y)
-            console.log(fillHeight)
+            let fillWidth = (result[0].bottom_right_x - result[0].top_left_x);
+            let fillHeight = (result[0].bottom_right_y - result[0].top_left_y);
 
             //create buffer of black marker
             const blackPng = sharp({
                 create: {
-                    width: 68,
-                    height: 72,
+                    width: fillWidth,
+                    height: fillHeight,
                     channels: 3,
                     background: { r: 0, g: 0, b: 0 }
                 }
