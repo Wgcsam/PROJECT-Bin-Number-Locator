@@ -2,6 +2,7 @@ const express = require('express');
 const mysql = require('mysql');
 const sharp = require ('sharp');
 require('dotenv').config();
+const url = require('url');
 
 //Variables used for image generation
 var warehouseImage = './images/WarehouseLayout_New.png';
@@ -41,7 +42,10 @@ app.enable('trust proxy');
 //Receive web request and validate
 app.get('/warehouse', function(req, res) {
     let imageWidth = 3000;
-    const binnumber = req.query.binnumber;
+    const binnumber = req.query.binnumber.toString().split(',');
+
+    //console.log(binnumber.toString().split(','));
+    
     if (req.query.width != null)
     {
         if (parseInt(req.query.width) && !Number(isNaN))
@@ -55,16 +59,32 @@ app.get('/warehouse', function(req, res) {
             return;
         }
     }
-
-    if (typeof binnumber != "string" || binnumber.length > 5)
-    {
+    
+    for (let index = 0; index < binnumber.length; index++) {
+        if (typeof binnumber[index] != "string" || binnumber[index].length > 5)
+        {
         res.send("Invalid parameters!");
         res.end();
         return;
+        }
     }
-    
+
+    const bins = [];
+
+    binnumber.forEach(element => {
+        db.query("SELECT top_left_x, top_left_y, bottom_right_x, bottom_right_y FROM " + process.env.DB_BASE + ".bin_location WHERE bin_number = ?", [element], function (err, result, fields){
+            bins.push(
+                {
+                    top_x: result[0].top_left_x, 
+                    top_y: result[0].top_left_y, 
+                    bottom_x: result[0].bottom_right_x, 
+                    bottom_y: result[0].bottom_right_y
+                });
+            console.log(bins + "during loop");
+    })});
+
     //Query MySQL database for bin using data located in web request
-    db.query("SELECT top_left_x, top_left_y, bottom_right_x, bottom_right_y FROM " + process.env.DB_BASE + ".bin_location WHERE bin_number = ?", [binnumber], function (err, result, fields) 
+    db.query("SELECT top_left_x, top_left_y, bottom_right_x, bottom_right_y FROM " + process.env.DB_BASE + ".bin_location WHERE bin_number = ?", [binnumber[0]], function (err, result, fields) 
     {
         if (err) 
         {
@@ -85,6 +105,7 @@ app.get('/warehouse', function(req, res) {
         }
         else 
         { 
+            console.log(bins[0].top_x + "after loop")
             let fillWidth = (result[0].bottom_right_x - result[0].top_left_x);
             let fillHeight = (result[0].bottom_right_y - result[0].top_left_y);
 
